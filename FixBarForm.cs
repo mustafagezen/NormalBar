@@ -69,8 +69,6 @@ namespace NormalBar
                 client.Connect();
                 ChangeProgress(40);
 
-                Thread.Sleep(2000);
-
                 //Commands passed in EstablishSshConnection parameter
                 foreach (var Command in command)
                 {
