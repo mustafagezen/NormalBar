@@ -21,6 +21,7 @@ namespace NormalBar
 
         private void fixIt_Click(object sender, EventArgs e)
         {
+            //New BW so UI don't freeze
             BackgroundWorker bw = new BackgroundWorker();
             bw.WorkerReportsProgress = true;
             bw.DoWork += bw_DoWork;
@@ -54,54 +55,37 @@ namespace NormalBar
             string pass;
             if (passBox.Text == "") pass = "alpine"; else pass = passBox.Text;
 
+
+            //Current directory
             var dir = AppDomain.CurrentDomain.BaseDirectory;
-            string strOutput = "";
 
             ChangeProgress(20);
 
-            //using (var client = new SshClient(ipBox.Text, "root", pass))
-            //{
-            //    client.Connect();
-            //    ChangeProgress(40);
-            //    client.RunCommand("sudo kill -9 SpringBoard");
-
-            //    Thread.Sleep(2000);
-            //    ChangeProgress(70);
-            //    ChangeProgress(100);
-            //}
-
-
+            //SSH Connection
             using (var client = new SshClient(ipBox.Text, "root", pass))
             {
                 ChangeProgress(30);
+
                 client.Connect();
                 ChangeProgress(40);
+
                 Thread.Sleep(2000);
 
+                //Commands passed in EstablishSshConnection parameter
                 foreach (var Command in command)
                 {
                     var cmd = client.RunCommand(Command);
                     Thread.Sleep(500);
                     ChangeProgress(progress.Value + 1);
-                    strOutput = strOutput + cmd.Result + "\n";
                 }
 
-                var cmd2 = client.RunCommand("sbreload");
-                strOutput = strOutput + cmd2.Result;
+                //Respring
+                client.RunCommand("sbreload");
 
                 ChangeProgress(100);
 
                 client.Disconnect();
             }
-
-            try
-            {
-                System.IO.StreamWriter file = new System.IO.StreamWriter(dir + @"\log.txt");
-                file.WriteLine(strOutput);
-                file.Close();
-            }
-            catch (Exception e)
-            { }
 
             MessageBox.Show("Success!");
         }
